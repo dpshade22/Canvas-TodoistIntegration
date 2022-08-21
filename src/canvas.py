@@ -98,53 +98,14 @@ class CanvasApi:
         assignmentList = []
 
         for assignment in assignments:
-            i = 0
-            newDueDate = ""
             if assignment.get("due_at") == None:
                 assignment["due_at"] = "2021-01-01"
-            else:
-                while assignment["due_at"][i] != "Z":
-                    newDueDate += assignment["due_at"][i]
-                    i += 1
-                newDueDate = datetime.strptime(newDueDate, "%Y-%m-%dT%H:%M:%S")
-                assignment["due_at"] = newDueDate.strftime("%Y-%m-%dT%H:%M:%SZ")
 
             assignment["url"] = assignment["html_url"]
             assignmentList.append(assignment)
 
         return assignmentList
 
-    # Prints version of all currently enrolled classes
-    def update_assignment_objects(
-        self, notionAssignmentsList, courseName, timeframe=None
-    ):
-        readUrl = f"https://{self.schoolAb}.com/api/v1/courses/{self.courses[courseName]}/assignments/"
-        params = {"per_page": 500, "bucket": timeframe}
-
-        assignments = requests.request(
-            "GET", readUrl, headers=self.header, params=params
-        ).json()
-        assignmentList = []
-
-        for assignment in assignments:
-            i = 0
-            newDueDate = ""
-            if assignment.get("due_at") == None:
-                assignment["due_at"] = None
-            else:
-                while assignment["due_at"][i] != "T":
-                    newDueDate += assignment["due_at"][i]
-                    i += 1
-
-                newDueDate = date.fromisoformat(newDueDate) - relativedelta(days=1)
-                assignment["due_at"] = str(newDueDate)
-
-            assignment["url"] = assignment["html_url"]
-
-            if assignment["url"] not in notionAssignmentsList:
-                assignmentList.append(assignment)
-
-        return assignmentList
 
     def list_classes_names(self):
         for course in self.get_course_objects():

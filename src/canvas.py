@@ -1,5 +1,5 @@
 import requests, json
-from datetime import date
+from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
 
@@ -103,10 +103,11 @@ class CanvasApi:
             if assignment.get("due_at") == None:
                 assignment["due_at"] = "2021-01-01"
             else:
-                while assignment["due_at"][i] != "T":
+                while assignment["due_at"][i] != "Z":
                     newDueDate += assignment["due_at"][i]
                     i += 1
-                assignment["due_at"] = newDueDate
+                newDueDate = datetime.strptime(newDueDate, "%Y-%m-%dT%H:%M:%S")
+                assignment["due_at"] = newDueDate.strftime("%Y-%m-%dT%H:%M:%SZ")
 
             assignment["url"] = assignment["html_url"]
             assignmentList.append(assignment)

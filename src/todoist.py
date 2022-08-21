@@ -9,8 +9,11 @@ class Todoist:
 
     def addNewTasks(self, taskName, taskClass, currTasks, dueDate=None, url=None):
         labelDict = self.api.get_labels()
+        taskDict = self.api.get_tasks()
+      
         labelDict = {label.name: label.id for label in labelDict}
-
+        taskIDS = {task.content: task.id for task in taskDict}
+      
         # Creates label if it doesn't exist
         if taskClass not in labelDict.keys():
             label = self.api.add_label(
@@ -18,7 +21,15 @@ class Todoist:
             )
             labelDict[taskClass] = label.id
 
-        if f"{taskClass}: {taskName}" in [task.content for task in currTasks]:
+        currTaskID = taskIDS.get(f"{taskClass}: {taskName}")
+        if currTaskID:  
+          oldDue = self.api.get_task(task_id=currTaskID).due.datetime
+      
+        if f"{taskClass}: {taskName}" in taskIDS.keys() and oldDue != dueDate:
+            task = self.api.update_task(task_id=currTaskID, due_string=dueDate)
+            print(f"Successfully updated: {taskClass}: {taskName}")
+            return
+        elif f"{taskClass}: {taskName}" in taskIDS.keys() and oldDue == dueDate:
             return
 
         try:
@@ -28,6 +39,6 @@ class Todoist:
                 label_ids=[labelDict[taskClass]],
                 description=f"[Canvas link]({url})",
             )
-            print(task)
+            print(f"Successfully added: {task.content}")
         except Exception as error:
             print(error)

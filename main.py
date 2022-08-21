@@ -23,24 +23,24 @@ def addTasks(courseList):
     for course in courseList:
         for assignment in canvasProfile.get_assignment_objects(course.name, "future"):
             # Check if there is a time or not
-            if (
-                assignment["lock_at"] and assignment["due_at"]
-            ) and datetime.datetime.strptime(
-                assignment["lock_at"], "%Y-%m-%dT%H:%M:%SZ"
-            ) > datetime.datetime.strptime(
-                assignment["due_at"], "%Y-%m-%d"
-            ):
-                due = assignment["lock_at"]
-            else:
-                assignment["due_at"]
+            # if (
+            #     assignment["lock_at"] and assignment["due_at"]
+            # ) and datetime.datetime.strptime(
+            #     assignment["lock_at"], "%Y-%m-%dT%H:%M:%SZ"
+            # ) > datetime.datetime.strptime(
+            #     assignment["due_at"], "%Y-%m-%d"
+            # ):
+            #     due = assignment["lock_at"]
+            # else:
+            #     assignment["due_at"]
 
             # Add task to Todoist
             myAPI.addNewTasks(
                 assignment["name"],
                 course.name,
                 currTasks,
-                dueDate=due,
-                url=assignment["html_url"],
+                dueDate=assignment["due_at"],
+                url=assignment["url"],
             )
 
 

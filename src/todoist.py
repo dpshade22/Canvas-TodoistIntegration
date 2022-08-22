@@ -1,17 +1,19 @@
 import requests, json
 from todoist_api_python.api import TodoistAPI
 import random
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
-
+import pytz
 
 load_dotenv()
 
 
 class Todoist:
-    def __init__(self, api, todoistKey):
+    def __init__(self, api, todoistKey, labelDict, taskDict):
         self.api = api
         self.todoistKey = todoistKey
+        self.labelDict = labelDict
+        self.taskDict = taskDict
 
     def addNewTasks(self, taskName, taskClass, dueDate=None, url=None):
         task = f"{taskClass}: {taskName}"
@@ -38,11 +40,8 @@ class Todoist:
                 print(f"Skipped {task}, since it's already been completed")
                 return
 
-        labelDict = self.api.get_labels()
-        taskDict = self.api.get_tasks()
-
-        labelDict = {label.name: label.id for label in labelDict}
-        taskIDS = {task.content: [task.id, task.description] for task in taskDict}
+        labelDict = {label.name: label.id for label in self.labelDict}
+        taskIDS = {task.content: [task.id, task.description] for task in self.taskDict}
 
         # Creates label if it doesn't exist
         if taskClass not in labelDict.keys():
@@ -56,31 +55,29 @@ class Todoist:
         allDesc = [task[1] for task in taskIDS.values()]
 
         if currTaskID:
-
-            oldDue = (
-                self.api.get_task(task_id=currTaskID).due.datetime
-                if self.api.get_task(task_id=currTaskID).due is not None
-                else "2001-01-01T00:00:00"
-            )
-
-            if oldDue and "Z" not in oldDue:
-                oldDue = (
-                    datetime.strptime(oldDue, "%Y-%m-%dT%H:%M:%S")
-                    .astimezone(timezone.utc)
-                    .strftime("%Y-%m-%dT%H:%M:%SZ")
-                )
-
-            if task in taskIDS.keys() and oldDue != dueDate or newUrl not in allDesc:
+            taskObj = self.api.get_task(task_id=currTaskID).due
+            oldDue = None
+          
+            if taskObj:
+                if "Z" in taskObj.datetime:
+                    oldDue = taskObj.datetime 
+                elif "Z" in taskObj.string: 
+                    oldDue = taskObj.string
+            else:
+                oldDue = "No date"
+        
+            if oldDue != dueDate or newUrl not in allDesc:
                 taskUpdated = self.api.update_task(
                     task_id=currTaskID,
                     due_string=dueDate,
                     description=newUrl,
                 )
                 print(f"Successfully updated: {task}")
-                return
-            elif task in taskIDS.keys() and oldDue == dueDate:
+
+            elif oldDue == dueDate:
                 print(f"Skipped {task} since it's already created")
-                return
+            
+            return
 
         # Try to add the task
         try:

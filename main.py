@@ -12,11 +12,13 @@ load_dotenv()
 def addTasks(canvasKey, todoistKey):
     canvasProfile = CanvasApi(canvasKey, "uk")
     todoistAPI = TodoistAPI(todoistKey)
-    todoistClass = Todoist(todoistAPI, todoistKey)
 
     canvasProfile.set_courses_and_id()
-    currTasks = todoistAPI.get_tasks()
+    labelDict = todoistAPI.get_labels()
+    taskDict = todoistAPI.get_tasks()
 
+    todoistClass = Todoist(todoistAPI, todoistKey, labelDict, taskDict)
+  
     for course in canvasProfile.get_courses_within_six_months():
         for assignment in canvasProfile.get_assignment_objects(course.name, "future"):
             todoistClass.addNewTasks(
@@ -33,5 +35,5 @@ dpsCanvasKey = os.environ.get("dpsCanvasKey")
 agbTodoistKey = os.environ.get("agbTodoistKey")
 agbCanvasKey = os.environ.get("agbCanvasKey")
 
-# addTasks(dpsCanvasKey, dpsTodoistKey)
-addTasks(agbCanvasKey, agbTodoistKey)
+addTasks(dpsCanvasKey, dpsTodoistKey)
+# addTasks(agbCanvasKey, agbTodoistKey)

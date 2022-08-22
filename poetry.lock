@@ -51,6 +51,14 @@ python-versions = ">=3.5"
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "pytz"
+version = "2022.2.1"
+description = "World timezone definitions, modern and historical"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "requests"
 version = "2.28.1"
 description = "Python HTTP for Humans."
@@ -96,7 +104,7 @@ brotli = ["brotlipy (>=0.6.0)", "brotli (>=1.0.9)", "brotlicffi (>=0.8.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "cc95e15aad37fedde67828de83389bce62067c5e0fb33c3dd2aeece26110c167"
+content-hash = "f3ab0da2e7d478d9ff30efc0bf311d39d2670e86f19fba022a50e63cdadabb9e"
 
 [metadata.files]
 attrs = []
@@ -104,6 +112,7 @@ certifi = []
 charset-normalizer = []
 idna = []
 python-dotenv = []
+pytz = []
 requests = []
 todoist-api-python = []
 urllib3 = []

@@ -32,6 +32,7 @@ class Todoist:
 
         for item in res["items"]:
             if task in item["content"]:
+                print(f"Skipped {task}, since it's already been completed")
                 return
 
         labelDict = self.api.get_labels()

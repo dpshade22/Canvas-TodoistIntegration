@@ -8,20 +8,18 @@ from src.todoist import Todoist
 
 load_dotenv()
 
-todoistKey = os.environ.get("todoistKey")
-canvasKey = os.environ.get("canvasKey")
 
-canvasProfile = CanvasApi(canvasKey, "uk")
-todoistAPI = TodoistAPI(todoistKey)
-myAPI = Todoist(todoistAPI)
+def addTasks(canvasKey, todoistKey):
+    canvasProfile = CanvasApi(canvasKey, "uk")
+    todoistAPI = TodoistAPI(todoistKey)
+    todoistClass = Todoist(todoistAPI)
 
-
-def addTasks(courseList):
     canvasProfile.set_courses_and_id()
     currTasks = todoistAPI.get_tasks()
-    for course in courseList:
+
+    for course in canvasProfile.get_courses_within_six_months():
         for assignment in canvasProfile.get_assignment_objects(course.name, "future"):
-            myAPI.addNewTasks(
+            todoistClass.addNewTasks(
                 assignment["name"],
                 course.name,
                 currTasks,
@@ -30,4 +28,11 @@ def addTasks(courseList):
             )
 
 
-addTasks(canvasProfile.get_courses_within_six_months())
+dpsTodoistKey = os.environ.get("dpsTodoistKey")
+dpsCanvasKey = os.environ.get("dpsCanvasKey")
+
+agbTodoistKey = os.environ.get("agbTodoistKey")
+agbCanvasKey = os.environ.get("agbCanvasKey")
+
+addTasks(dpsCanvasKey, dpsTodoistKey)
+addTasks(agbCanvasKey, agbTodoistKey)

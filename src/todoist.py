@@ -52,7 +52,7 @@ class Todoist:
             labelDict[taskClass] = label.id
 
         # If task is already created, update, or skip it
-        currTaskID, oldUrl = taskIDS.get(task)
+        currTaskID, oldUrl = taskIDS.get(task) if taskIDS.get(task) != None else [None, None]
         allDesc = [task[1] for task in taskIDS.values()]
 
         if currTaskID:

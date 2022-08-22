@@ -20,7 +20,7 @@ class Todoist:
         if "LIVE" in taskName:
             return
 
-        url = "https://api.todoist.com/sync/v9/completed/get_all"
+        completedTasks = "https://api.todoist.com/sync/v9/completed/get_all"
 
         payload = ""
         headers = {
@@ -28,7 +28,9 @@ class Todoist:
             "Authorization": f"Bearer {self.todoistKey}",
         }
 
-        res = requests.request("GET", url, data=payload, headers=headers).json()
+        res = requests.request(
+            "GET", completedTasks, data=payload, headers=headers
+        ).json()
 
         for item in res["items"]:
             if task in item["content"]:

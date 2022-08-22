@@ -57,7 +57,7 @@ class Todoist:
                 else "2001-01-01T00:00:00"
             )
 
-            if "Z" not in oldDue:
+            if oldDue and "Z" not in oldDue:
                 oldDue = (
                     datetime.strptime(oldDue, "%Y-%m-%dT%H:%M:%S")
                     .astimezone(timezone.utc)
@@ -69,6 +69,7 @@ class Todoist:
                 print(f"Successfully updated: {taskClass}: {taskName}")
                 return
             elif task in taskIDS.keys() and oldDue == dueDate:
+                print(f"Skipped {task} since it's already created")
                 return
 
         # Try to add the task

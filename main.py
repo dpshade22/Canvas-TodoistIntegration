@@ -35,4 +35,4 @@ agbTodoistKey = os.environ.get("agbTodoistKey")
 agbCanvasKey = os.environ.get("agbCanvasKey")
 
 addTasks(dpsCanvasKey, dpsTodoistKey)
-# addTasks(agbCanvasKey, agbTodoistKey)
+addTasks(agbCanvasKey, agbTodoistKey)

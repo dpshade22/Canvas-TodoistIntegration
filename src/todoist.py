@@ -13,8 +13,9 @@ class Todoist:
         self.api = api
         self.todoistKey = todoistKey
 
-    def addNewTasks(self, taskName, taskClass, currTasks, dueDate=None, url=None):
+    def addNewTasks(self, taskName, taskClass, dueDate=None, url=None):
         task = f"{taskClass}: {taskName}"
+        newUrl = f"[Canvas link]({url})"
 
         # Conditional Skips
         if "LIVE" in taskName:
@@ -41,7 +42,7 @@ class Todoist:
         taskDict = self.api.get_tasks()
 
         labelDict = {label.name: label.id for label in labelDict}
-        taskIDS = {task.content: task.id for task in taskDict}
+        taskIDS = {task.content: [task.id, task.description] for task in taskDict}
 
         # Creates label if it doesn't exist
         if taskClass not in labelDict.keys():
@@ -51,8 +52,11 @@ class Todoist:
             labelDict[taskClass] = label.id
 
         # If task is already created, update, or skip it
-        currTaskID = taskIDS.get(f"{taskClass}: {taskName}")
+        currTaskID, oldUrl = taskIDS.get(task)
+        allDesc = [task[1] for task in taskIDS.values()]
+
         if currTaskID:
+
             oldDue = (
                 self.api.get_task(task_id=currTaskID).due.datetime
                 if self.api.get_task(task_id=currTaskID).due is not None
@@ -66,9 +70,13 @@ class Todoist:
                     .strftime("%Y-%m-%dT%H:%M:%SZ")
                 )
 
-            if task in taskIDS.keys() and oldDue != dueDate:
-                task = self.api.update_task(task_id=currTaskID, due_string=dueDate)
-                print(f"Successfully updated: {taskClass}: {taskName}")
+            if task in taskIDS.keys() and oldDue != dueDate or newUrl not in allDesc:
+                taskUpdated = self.api.update_task(
+                    task_id=currTaskID,
+                    due_string=dueDate,
+                    description=newUrl,
+                )
+                print(f"Successfully updated: {task}")
                 return
             elif task in taskIDS.keys() and oldDue == dueDate:
                 print(f"Skipped {task} since it's already created")

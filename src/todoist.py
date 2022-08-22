@@ -2,17 +2,37 @@ import requests, json
 from todoist_api_python.api import TodoistAPI
 import random
 from datetime import datetime, timezone
-import pytz
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 class Todoist:
-    def __init__(self, api):
+    def __init__(self, api, todoistKey):
         self.api = api
+        self.todoistKey = todoistKey
 
     def addNewTasks(self, taskName, taskClass, currTasks, dueDate=None, url=None):
+        task = f"{taskClass}: {taskName}"
+
         # Conditional Skips
         if "LIVE" in taskName:
             return
+
+        url = "https://api.todoist.com/sync/v9/completed/get_all"
+
+        payload = ""
+        headers = {
+            "cookie": "csrf=8af57fcfdde54dc3b650bc3d251c47b5",
+            "Authorization": f"Bearer {self.todoistKey}",
+        }
+
+        res = requests.request("GET", url, data=payload, headers=headers).json()
+
+        for item in res["items"]:
+            if task in item["content"]:
+                return
 
         labelDict = self.api.get_labels()
         taskDict = self.api.get_tasks()
@@ -27,6 +47,7 @@ class Todoist:
             )
             labelDict[taskClass] = label.id
 
+        # If task is already created, update, or skip it
         currTaskID = taskIDS.get(f"{taskClass}: {taskName}")
         if currTaskID:
             oldDue = (
@@ -42,16 +63,17 @@ class Todoist:
                     .strftime("%Y-%m-%dT%H:%M:%SZ")
                 )
 
-            if f"{taskClass}: {taskName}" in taskIDS.keys() and oldDue != dueDate:
+            if task in taskIDS.keys() and oldDue != dueDate:
                 task = self.api.update_task(task_id=currTaskID, due_string=dueDate)
                 print(f"Successfully updated: {taskClass}: {taskName}")
                 return
-            elif f"{taskClass}: {taskName}" in taskIDS.keys() and oldDue == dueDate:
+            elif task in taskIDS.keys() and oldDue == dueDate:
                 return
 
+        # Try to add the task
         try:
             task = self.api.add_task(
-                content=f"{taskClass}: {taskName}",
+                content=task,
                 due_string=dueDate,
                 label_ids=[labelDict[taskClass]],
                 description=f"[Canvas link]({url})",

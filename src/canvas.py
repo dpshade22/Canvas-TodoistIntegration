@@ -20,33 +20,35 @@ class CanvasApi:
         self.courses = {}
 
     def get_courses_within_six_months(self):
-        
+
         url = f"https://{self.schoolAb}.instructure.com/api/v1/courses"
-        
-        querystring = {"per_page":"350"}
-        
+
+        querystring = {"per_page": "350"}
+
         payload = ""
         headers = {
             "cookie": "_csrf_token=1w3GGSY5y277Fr5m%252BxvP%252BBBxeYmmqY2fYM1mifSguCuya4l%252Bbk%252BGObB9%252BTKRKqaxdwAWpsWZyKgStSrrm%252FH3Yg%253D%253D; log_session_id=c86aaa6df20861f9eb9f187135c208c8; _legacy_normandy_session=AH4ltuqs4AitPXGvQJXlTw.zkdNmpMv8Zsb4nVkAMalIZKdYtrgygqeG8skrEhrcug95aURmCGyN58gPYLDWeHbc9XzMYnOZ_LqqaMgmmK_d4XhnL0ECVkgEo_Otm5nGiHvVOHhgIFfIURaHMe_IIJO.WIdaxvIl6w_YgYXfzqbnJxdmTbM.YwJ9zw; canvas_session=AH4ltuqs4AitPXGvQJXlTw.zkdNmpMv8Zsb4nVkAMalIZKdYtrgygqeG8skrEhrcug95aURmCGyN58gPYLDWeHbc9XzMYnOZ_LqqaMgmmK_d4XhnL0ECVkgEo_Otm5nGiHvVOHhgIFfIURaHMe_IIJO.WIdaxvIl6w_YgYXfzqbnJxdmTbM.YwJ9zw",
-            "Authorization": f"Bearer {self.canvasKey}"
+            "Authorization": f"Bearer {self.canvasKey}",
         }
 
         classes = []
-        courses = requests.request("GET", url, data=payload, headers=headers, params=querystring).json()
-        
+        courses = requests.request(
+            "GET", url, data=payload, headers=headers, params=querystring
+        ).json()
+
         for course in courses:
-          if course.get("name") != None and course.get("enrollment_term_id") == 10748:
-              name = course.get("name")
-              name = cleanCourseName(name)
+            if course.get("name") != None and course.get("enrollment_term_id") == 10748:
+                name = course.get("name")
+                name = cleanCourseName(name)
 
-              classObj = Class(
-                  course.get("id"),
-                  name,
-                  course.get("enrollment_term_id"),
-                  course.get("assignments"),
-              )
+                classObj = Class(
+                    course.get("id"),
+                    name,
+                    course.get("enrollment_term_id"),
+                    course.get("assignments"),
+                )
 
-              classes.append(classObj)
+                classes.append(classObj)
 
         return classes
 
@@ -63,18 +65,18 @@ class CanvasApi:
         ).json()
 
         for i in courses:
-          if i.get("name") != None:
-              name = i.get("name")
-              name = cleanCourseName(name)
+            if i.get("name") != None:
+                name = i.get("name")
+                name = cleanCourseName(name)
 
-              classObj = Class(
-                  i.get("id"),
-                  name,
-                  i.get("enrollment_term_id"),
-                  i.get("assignments"),
-              )
-              classes.append(classObj)
-      
+                classObj = Class(
+                    i.get("id"),
+                    name,
+                    i.get("enrollment_term_id"),
+                    i.get("assignments"),
+                )
+                classes.append(classObj)
+
         return classes
 
     # Initialize self.courses dictionary with the key being
@@ -99,13 +101,17 @@ class CanvasApi:
 
         for assignment in assignments:
             if assignment.get("due_at") == None:
-                assignment["due_at"] = "2021-01-01"
+                assignment["due_at"] = "No due date"
+            elif (
+                datetime.strptime(assignment["due_at"], "%Y-%m-%dT%H:%M:%SZ")
+                <= datetime.now()
+            ):
+                continue
 
             assignment["url"] = assignment["html_url"]
             assignmentList.append(assignment)
 
         return assignmentList
-
 
     def list_classes_names(self):
         for course in self.get_course_objects():

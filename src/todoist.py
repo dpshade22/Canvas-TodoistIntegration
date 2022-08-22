@@ -51,22 +51,38 @@ class Todoist:
             labelDict[taskClass] = label.id
 
         # If task is already created, update, or skip it
-        currTaskID, oldUrl = taskIDS.get(task) if taskIDS.get(task) != None else [None, None]
+        currTaskID, oldUrl = (
+            taskIDS.get(task) if taskIDS.get(task) != None else [None, None]
+        )
         allDesc = [task[1] for task in taskIDS.values()]
 
         if currTaskID:
             taskObj = self.api.get_task(task_id=currTaskID).due
             oldDue = None
-          
+
             if taskObj:
-                if "Z" in taskObj.datetime:
-                    oldDue = taskObj.datetime 
-                elif "Z" in taskObj.string: 
-                    oldDue = taskObj.string
-            else:
-                oldDue = "No date"
-        
+                try:
+                    if "Z" in taskObj.datetime:
+                        oldDue = taskObj.datetime
+                    elif "Z" in taskObj.string:
+                        oldDue = taskObj.string
+                    else:
+                        try:
+                            oldDue = (
+                                datetime.strptime(
+                                    taskObj.datetime,
+                                    "%Y-%m-%dT%H:%M:%S",
+                                )
+                                .astimezone(pytz.utc)
+                                .strftime("%Y-%m-%dT%H:%M:%SZ")
+                            )
+                        except:
+                            oldDue = "No date"
+                except:
+                    oldDue = taskObj.date
+
             if oldDue != dueDate or newUrl not in allDesc:
+                # Update task
                 taskUpdated = self.api.update_task(
                     task_id=currTaskID,
                     due_string=dueDate,
@@ -76,7 +92,7 @@ class Todoist:
 
             elif oldDue == dueDate:
                 print(f"Skipped {task} since it's already created")
-            
+
             return
 
         # Try to add the task

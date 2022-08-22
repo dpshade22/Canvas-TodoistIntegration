@@ -18,7 +18,7 @@ def addTasks(canvasKey, todoistKey):
     taskDict = todoistAPI.get_tasks()
 
     todoistClass = Todoist(todoistAPI, todoistKey, labelDict, taskDict)
-  
+
     for course in canvasProfile.get_courses_within_six_months():
         for assignment in canvasProfile.get_assignment_objects(course.name, "future"):
             todoistClass.addNewTasks(
@@ -36,4 +36,4 @@ agbTodoistKey = os.environ.get("agbTodoistKey")
 agbCanvasKey = os.environ.get("agbCanvasKey")
 
 addTasks(dpsCanvasKey, dpsTodoistKey)
-# addTasks(agbCanvasKey, agbTodoistKey)
+addTasks(agbCanvasKey, agbTodoistKey)

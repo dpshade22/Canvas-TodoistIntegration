@@ -19,7 +19,6 @@ myAPI = Todoist(todoistAPI)
 def addTasks(courseList):
     canvasProfile.set_courses_and_id()
     currTasks = todoistAPI.get_tasks()
-    due = ""
     for course in courseList:
         for assignment in canvasProfile.get_assignment_objects(course.name, "future"):
             myAPI.addNewTasks(
